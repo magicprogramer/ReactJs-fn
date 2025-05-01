@@ -1,3 +1,23 @@
 {
+  "posts": [
+    {
+      "id": "2",
+      "title": "second post",
+      "body": "hello world every one this is a test",
+      "image": "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
+      "user": {
+        "name": "mahmed"
+      }
+    },
+    {
+      "id": "3",
+      "title": "can ya makan",
+      "body": "bad very bad ",
+      "image": "https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp",
+      "user": {
+        "name": "ahmed"
+      }
+    }
+  ],
   "users": []
 }
