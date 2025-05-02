@@ -10,11 +10,10 @@ import axios from "axios";
 export default function App() {
   const [Posts, setPosts] = useState([
   ]);
-const url = "http://localhost:6003/";
+const url = "http://localhost:3018";
 const navigate = useNavigate();
 useEffect(()=>{async function getPosts(){
-      const {data} = await axios.get(url+"posts/");
-      //console.log(data.data);
+      const {data} = await axios.get(url+"/posts")
       setPosts(data);
     
     }
@@ -24,7 +23,7 @@ useEffect(()=>{async function getPosts(){
   const handleDelete = (id) => {
     console.log("OK");
     const newPosts = Posts.filter((post) => post.id != id);
-    const r = axios.delete(url+"posts/"+id);
+    const r = axios.delete(url+"/posts/"+id);
     console.log(r);
     setPosts(newPosts);
   };
@@ -32,7 +31,7 @@ useEffect(()=>{async function getPosts(){
     const post = Posts.find((post) => post.id == id);
     console.log({...post, ...data, id : id});
    // return ;
-    const res = await axios.put(url+"posts/"+id, {...post, ...data, id : id});
+    const res = await axios.put(url+"/posts/"+id, {...post, ...data, id : id});
     console.log(res);
     const newPost = Posts.map((post)=>{
       if (post.id == id)
