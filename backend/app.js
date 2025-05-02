@@ -6,7 +6,6 @@ const secret = "IT_ITI_1234";
 const app = express();
 const bcrypt = require('bcrypt');
 
-// Configure CORS
 app.use(cors({
     origin: '*',
     method: ['GET', 'POST', 'PUT', 'DELETE']
@@ -73,11 +72,15 @@ app.post("/posts", auth, async (req, res)=>{
         title : req.body.title,
         body : req.body.body,
         image : req.body.image,
-        user : {name:req.user.name}
+        user : {name:req.user}
     }
 );
     await post.save();
-    res.json(post._id);
+    console.log("req " + req.user);
+   // console.log("post : " + post);
+    const data = {...post, id: post._id};
+    delete data._id;
+    res.json(data);
 });
 
 

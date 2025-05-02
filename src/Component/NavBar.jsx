@@ -68,6 +68,16 @@ export default function NavBar({handleLogout}) {
         Login
       </button>
       </Link>
+
+      
+      }
+      {
+        !localStorage.getItem("token") &&
+        <Link to="/register">
+          <button className="btn bg-white text-black border-[#e5e5e5]">
+            register
+          </button>
+        </Link>
       }
     </div>
   );
