@@ -1,0 +1,119 @@
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const secret = "IT_ITI_1234";
+const app = express();
+const bcrypt = require('bcrypt');
+app.use(cors());
+app.use(express.json());
+
+mongoose.connect("mongodb://localhost:27017/reactjs", {
+});
+
+const postSchema = new mongoose.Schema({
+    title: String,
+    body: String,
+    image: String,
+    user: {
+      name: String
+    }
+});
+
+const userSchema = new mongoose.Schema({
+    name: String,
+    password: String
+});
+
+const Post = mongoose.model('Post', postSchema);
+const User = mongoose.model('User', userSchema);
+function auth(req, res, next){
+    let token = req.headers.authorization;
+    if (!token) return res.status(404).json("invalid");
+    console.log(token);
+    if (token.startsWith("Bearer ")){
+        token = token.slice(7);
+    };
+    jwt.verify(token, secret, (err, user)=>{
+        if (err)return res.status(404).json("error");
+        req.user = user;
+        next();
+    });
+}
+
+app.get("/posts/:id", async (req, res)=>{
+    const data = await Post.findOne({_id: req.params.id})
+
+});
+app.put("/posts/:id", async (req, res)=>{
+    await Post.updateOne({_id: req.params.id}, {$set: req.body});
+    res.send("done !");
+});
+app.get("/posts", async (req, res)=>{
+    //res.json("hello world");
+    let data = await Post.find({});
+    data=  data.map((post)=>{
+        const { _id, ...rest } = post.toObject();
+        return { id: _id, ...rest };
+    })
+    res.json(data);
+});
+
+app.post("/posts", auth, async (req, res)=>{
+    const post = new Post({
+        title : req.body.title,
+        body : req.body.body,
+        image : req.body.image,
+        user : {name:req.user.name}
+    }
+);
+    await post.save();
+    res.json(post._id);
+});
+
+
+app.delete("/posts/:id", auth, async (req, res)=>{
+    if (req.user.name != (await Post.findOne({_id: req.params.id})).user.name)
+    {
+        return res.status(403).json("not allowed "+req.user.name);
+    }
+    await Post.deleteOne({_id: req.params.id});
+    res.send("done !");
+});
+
+app.post("/register", async (req, res)=>{
+    //  return res.json("OK");
+      if (!req.body.password || !req.body.name) {
+          return res.status(404).json("something wrong");
+      }
+    //  res.send(User.findOne({name: req.body.name}));
+      const exist = await User.findOne({name: req.body.name});
+      if (exist) {
+          return res.status(404).json("user already exists");
+      }
+      const user = new User({
+          name: req.body.name,
+          password: await bcrypt.hash(req.body.password, 9)
+      });
+      await user.save();
+      return res.status(201).json(user);
+  });
+app.post("/login", async (req, res)=>{
+    const user = await User.findOne({name: req.body.name});
+    if (!user) {
+        return res.status(404).json("user not found");
+    }
+    const match = await bcrypt.compare(req.body.password, user.password);
+    if (match) {
+        return jwt.sign({name: user.name}, secret, (err, token)=>{
+            if (err)return res.status(404).json("error");
+            return res.status(200).json({token: token});
+        });
+    }
+    
+    return res.status(404).json("wrong password");
+});
+const port = 3018;
+app.listen(port, () => {
+    console.log(`Server Started at ${port}`);
+});
