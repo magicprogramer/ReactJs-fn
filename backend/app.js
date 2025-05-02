@@ -5,7 +5,13 @@ const jwt = require('jsonwebtoken');
 const secret = "IT_ITI_1234";
 const app = express();
 const bcrypt = require('bcrypt');
-app.use(cors());
+
+// Configure CORS
+app.use(cors({
+    origin: '*',
+    method: ['GET', 'POST', 'PUT', 'DELETE']
+}));
+
 app.use(express.json());
 
 mongoose.connect("mongodb://localhost:27017/reactjs", {
@@ -36,18 +42,21 @@ function auth(req, res, next){
     };
     jwt.verify(token, secret, (err, user)=>{
         if (err)return res.status(404).json("error");
-        req.user = user;
+        //console.log("decrypt "+user.name);
+        req.user = user.name;
         next();
     });
 }
 
 app.get("/posts/:id", async (req, res)=>{
-    const data = await Post.findOne({_id: req.params.id})
+    const data = await Post.findOne({_id: req.params.id});
+    return res.json(data);
 
 });
 app.put("/posts/:id", async (req, res)=>{
+    console.log(req.body);
     await Post.updateOne({_id: req.params.id}, {$set: req.body});
-    res.send("done !");
+    return res.send("done !");
 });
 app.get("/posts", async (req, res)=>{
     //res.json("hello world");
@@ -73,9 +82,9 @@ app.post("/posts", auth, async (req, res)=>{
 
 
 app.delete("/posts/:id", auth, async (req, res)=>{
-    if (req.user.name != (await Post.findOne({_id: req.params.id})).user.name)
+    if (req.user != (await Post.findOne({_id: req.params.id})).user.name)
     {
-        return res.status(403).json("not allowed "+req.user.name);
+        return res.status(201).json("not allowed "+req.user);
     }
     await Post.deleteOne({_id: req.params.id});
     res.send("done !");
@@ -107,6 +116,7 @@ app.post("/login", async (req, res)=>{
     if (match) {
         return jwt.sign({name: user.name}, secret, (err, token)=>{
             if (err)return res.status(404).json("error");
+            console.log(token);
             return res.status(200).json({token: token});
         });
     }
