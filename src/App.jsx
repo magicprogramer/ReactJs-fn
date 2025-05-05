@@ -162,41 +162,43 @@ export default function App() {
           <Route
             path="/"
             element={
-              <InfiniteScroll
-                dataLength={Posts.length}
-                next={getPosts}
-                hasMore={!finish}
-                loader={
-                  <div className="w-full h-[30vh] flex items-center justify-center overflow-hidden">
-                    <span className="loading loading-infinity w-16 h-16 scale-[3]"></span>
+              <>
+                {localStorage.getItem("token") && (
+                  <Link
+                    to="/create"
+                    className="sticky top-40 left-0 z-50 mt-8 inline-block bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition"
+                  >
+                    Add Post
+                  </Link>
+                )}
+                <InfiniteScroll
+                  dataLength={Posts.length}
+                  next={getPosts}
+                  hasMore={!finish}
+                  loader={
+                    <div className="w-full h-[30vh] flex items-center justify-center overflow-hidden">
+                      <span className="loading loading-infinity w-16 h-16 scale-[3]"></span>
+                    </div>
+                  }
+                  endMessage={
+                    <p style={{ textAlign: "center" }}>
+                      <b>Yay! You have seen it all</b>
+                    </p>
+                  }
+                >
+                  <div className="flex flex-col items-center min-h-screen bg-gray-100 py-10 px-4">
+                    <div className="w-full max-w-2xl space-y-6">
+                      {Posts.map((post) => (
+                        <Post
+                          key={post.id}
+                          post={post}
+                          handleDelete={handleDelete}
+                        />
+                      ))}
+                    </div>
                   </div>
-                }
-                endMessage={
-                  <p style={{ textAlign: "center" }}>
-                    <b>Yay! You have seen it all</b>
-                  </p>
-                }
-              >
-                <div className="flex flex-col items-center min-h-screen bg-gray-100 py-10 px-4">
-                  <div className="w-full max-w-2xl space-y-6">
-                    {Posts.map((post) => (
-                      <Post
-                        key={post.id}
-                        post={post}
-                        handleDelete={handleDelete}
-                      />
-                    ))}
-                  </div>
-                  {localStorage.getItem("token") && (
-                    <Link
-                      to="/create"
-                      className="mt-8 inline-block bg-blue-600 text-white px-6 py-3 rounded-xl shadow-md hover:bg-blue-700 transition"
-                    >
-                      Add Post
-                    </Link>
-                  )}
-                </div>
-              </InfiniteScroll>
+                </InfiniteScroll>
+              </>
             }
           ></Route>
         </Routes>
