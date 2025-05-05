@@ -175,7 +175,6 @@ export default function App() {
                     Add Post
                   </Link>
                 )}
-                {Posts.length === 0 && <>loading ...</>}
                 {
                   <InfiniteScroll
                     dataLength={Posts.length}
