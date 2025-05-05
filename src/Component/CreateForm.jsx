@@ -17,6 +17,7 @@ export default function CreateForm({ handleCreate }) {
     >
       <input type="file" {...register("image")} />
       <input
+        required
         type="text"
         {...register("title")}
         placeholder="Title"
@@ -24,6 +25,7 @@ export default function CreateForm({ handleCreate }) {
       />
 
       <textarea
+        required
         {...register("body")}
         cols="30"
         rows="10"

@@ -19,14 +19,28 @@ export default function App() {
   const [parsedPosts, setParsedPosts] = useState(0);
   const url = "http://localhost:3018";
   const [finish, setFinish] = useState(false);
+  const [reset, setReset] = useState(false);
   const navigate = useNavigate();
-  async function getPosts() {
+  useEffect(() => {
+    console.log("render");
+  });
+  useEffect(() => {
+    setFinish(false);
+    setPosts([]);
+    setPage(1);
+    navigate("/");
+  }, [reset]);
+  async function getPosts(reset) {
+    if (reset) {
+      navigate("/");
+    }
     const res = await axios.get(url + "/posts?page=" + page);
     await new Promise((resolve) => setTimeout(resolve, 500));
     const { data, fin } = res.data;
     console.log(fin);
+    const newPage = page;
     setPage((prev) => prev + 1);
-    if (page == fin) {
+    if (newPage == fin) {
       setFinish(true);
     }
     // setParsedPosts((prev) => prev + data.length);
@@ -34,6 +48,9 @@ export default function App() {
     console.log(Posts);
     console.log("page" + page);
   }
+  const resetFeed = () => {
+    setPosts([]);
+  };
   const handleLogin = async (data) => {
     const res = await axios.post(url + "/login", data);
     console.log(data);
@@ -55,23 +72,24 @@ export default function App() {
     localStorage.removeItem("user");
     navigate("/");
   };
-  const handleCreate = async (data) => {
+  const handleImage = async (data) => {
     const d = new FormData();
     d.append("title", data.title);
     d.append("body", data.body);
     if (data.image?.[0]) {
       d.append("image", data.image[0]);
     }
+    return d;
+  };
+  const handleCreate = async (data) => {
+    const d = await handleImage(data);
     const res = await axios.post(url + "/posts", d, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
 
     console.log(res);
-    const image  = res.data;
-    console.log("image -> " + image.data);
-    return;
-    setPosts([...Posts, res.data]);
-    navigate("/");
+    const image = res.data;
+    setReset((prev) => !prev);
   };
   const handleDelete = async (id) => {
     console.log("OK");
@@ -94,9 +112,10 @@ export default function App() {
     }
 
     try {
+      data = handleImage(data);
       const res = await axios.put(
         url + "/posts/" + id,
-        { ...post, ...data, _id: id },
+        { ...post, ...data, _id: id, image: data.image || post.image },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
