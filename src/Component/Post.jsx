@@ -23,7 +23,7 @@ export default function Post(props) {
             </div>
           </h2>
           <p>{post.body}</p>
-          {post.user?.name === "ahmed" && (
+          {post.user && post.user.name === localStorage.getItem("user") && (
             <div className="card-actions justify-end">
               <div
                 className="btn btn-accent"
