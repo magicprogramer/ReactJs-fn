@@ -58,7 +58,7 @@ app.get("/posts/:id", async (req, res) => {
   return res.json(data);
 });
 app.put("/posts/:id", async (req, res) => {
-  console.log(req.body);
+  console.log("update " + JSON.stringify(req.body));
   await Post.updateOne({ _id: req.params.id }, { $set: req.body });
   return res.send("done !");
 });

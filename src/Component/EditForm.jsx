@@ -12,22 +12,32 @@ export default function EditForm({ handleEdit }) {
       navigator("/");
     }
   }, [post, navigator]);
+
   if (!post) return null;
   console.log(post.title);
-  const { register, handleSubmit } = useForm({
+  const { register, handleSubmit, reset } = useForm({
     defaultValues: {
       title: post.title,
       body: post.body,
     },
   });
+
+  useEffect(() => {
+    if (post) {
+      reset({
+        title: post.title,
+        body: post.body,
+      });
+    }
+  }, [post, reset]);
   const onSubmit = (data) => handleEdit(id, data);
-  console.log(id, post);
+  console.log("the data " + id, post);
   return (
     <>
       <div className="flex justify-center items-center">
         <img src={post.image} className="w-[40vw] h-[40vh] object-cover" />
       </div>
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} encType="multipart/form-data">
         <input
           required
           type="text"
@@ -37,19 +47,11 @@ export default function EditForm({ handleEdit }) {
         />
         <input
           required
-          {...register("title")}
+          {...register("body")}
           type="text"
           placeholder="title"
           className="input input-bordered block"
         />
-        <textarea
-          cols="30"
-          rows="10"
-          {...register("body")}
-          type="text"
-          placeholder="body"
-          className="input input-bordered block"
-        ></textarea>
 
         <button type="submit" className="btn btn-primary hover:bg-blue-500">
           Edit

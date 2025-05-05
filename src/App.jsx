@@ -21,6 +21,7 @@ export default function App() {
   const [finish, setFinish] = useState(false);
   const [reset, setReset] = useState(false);
   const navigate = useNavigate();
+
   useEffect(() => {
     console.log("render");
   });
@@ -47,6 +48,7 @@ export default function App() {
     setPosts((prev) => [...prev, ...data]);
     console.log(Posts);
     console.log("page" + page);
+    if (page == 1) setPage(2);
   }
   const resetFeed = () => {
     setPosts([]);
@@ -103,6 +105,7 @@ export default function App() {
     setPosts(newPosts);
   };
   const handleEdit = async (id, data) => {
+    console.log("here " + id + " " + data);
     const post = Posts.find((post) => post.id == id);
     const token = localStorage.getItem("token") || null;
 
@@ -112,7 +115,8 @@ export default function App() {
     }
 
     try {
-      data = handleImage(data);
+      //  data = handleImage(data);
+      console.log("data " + { ...data });
       const res = await axios.put(
         url + "/posts/" + id,
         { ...post, ...data, _id: id, image: data.image || post.image },
@@ -171,33 +175,36 @@ export default function App() {
                     Add Post
                   </Link>
                 )}
-                <InfiniteScroll
-                  dataLength={Posts.length}
-                  next={getPosts}
-                  hasMore={!finish}
-                  loader={
-                    <div className="w-full h-[30vh] flex items-center justify-center overflow-hidden">
-                      <span className="loading loading-infinity w-16 h-16 scale-[3]"></span>
+                {Posts.length === 0 && <>loading ...</>}
+                {
+                  <InfiniteScroll
+                    dataLength={Posts.length}
+                    next={getPosts}
+                    hasMore={!finish}
+                    loader={
+                      <div className="w-full h-[30vh] flex items-center justify-center overflow-hidden">
+                        <span className="loading loading-infinity w-16 h-16 scale-[3]"></span>
+                      </div>
+                    }
+                    endMessage={
+                      <p style={{ textAlign: "center" }}>
+                        <b>Yay! You have seen it all</b>
+                      </p>
+                    }
+                  >
+                    <div className="flex flex-col items-center min-h-screen bg-gray-100 py-10 px-4">
+                      <div className="w-full max-w-2xl space-y-6">
+                        {Posts.map((post) => (
+                          <Post
+                            key={post.id}
+                            post={post}
+                            handleDelete={handleDelete}
+                          />
+                        ))}
+                      </div>
                     </div>
-                  }
-                  endMessage={
-                    <p style={{ textAlign: "center" }}>
-                      <b>Yay! You have seen it all</b>
-                    </p>
-                  }
-                >
-                  <div className="flex flex-col items-center min-h-screen bg-gray-100 py-10 px-4">
-                    <div className="w-full max-w-2xl space-y-6">
-                      {Posts.map((post) => (
-                        <Post
-                          key={post.id}
-                          post={post}
-                          handleDelete={handleDelete}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </InfiniteScroll>
+                  </InfiniteScroll>
+                }
               </>
             }
           ></Route>
