@@ -2,17 +2,22 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
+const FormData = require("form-data");
 const secret = "IT_ITI_1234";
 const app = express();
 const bcrypt = require("bcrypt");
-
+const fileUpload = require("express-fileupload");
+const axios = require("axios");
+app.use(fileUpload());
 app.use(
   cors({
     origin: "*",
     method: ["GET", "POST", "PUT", "DELETE"],
   })
 );
+require("dotenv").config();
 
+const apiKey = process.env.API_KEY;
 app.use(express.json());
 
 mongoose.connect("mongodb://localhost:27017/reactjs", {});
@@ -80,13 +85,29 @@ app.get("/posts", async (req, res) => {
 });
 
 app.post("/posts", auth, async (req, res) => {
+  const image = req.files?.image;
+  //console.log("Uploaded image file:", image);
+  const form = new FormData();
+  form.append("key", apiKey);
+  form.append("image", image.data, image.name);
+  const {
+    data: {
+      data: { url, title },
+    },
+  } = await axios.post("https://api.imgbb.com/1/upload", form, {
+    headers: form.getHeaders(),
+  });
+  //console.log(url, title);
+
+  //return res.json(image);
   const post = new Post({
     title: req.body.title,
     body: req.body.body,
-    image: req.body.image,
+    image: url,
     user: { name: req.user },
   });
   await post.save();
+  console.log(post.image);
   console.log("req " + req.user);
   // console.log("post : " + post);
   const data = { ...post, id: post._id };
@@ -137,5 +158,5 @@ app.post("/login", async (req, res) => {
 });
 const port = 3018;
 app.listen(port, () => {
-  console.log(`Server Started at ${port}`);
+  console.log(`Server Started at ${port} api key = ${apiKey}`);
 });

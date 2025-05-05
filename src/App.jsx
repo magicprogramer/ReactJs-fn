@@ -56,10 +56,20 @@ export default function App() {
     navigate("/");
   };
   const handleCreate = async (data) => {
-    const res = await axios.post(url + "/posts", data, {
+    const d = new FormData();
+    d.append("title", data.title);
+    d.append("body", data.body);
+    if (data.image?.[0]) {
+      d.append("image", data.image[0]);
+    }
+    const res = await axios.post(url + "/posts", d, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
     });
+
     console.log(res);
+    const image  = res.data;
+    console.log("image -> " + image.data);
+    return;
     setPosts([...Posts, res.data]);
     navigate("/");
   };
